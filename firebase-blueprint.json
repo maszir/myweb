@@ -1,0 +1,78 @@
+{
+  "entities": {
+    "posts": {
+      "title": "BlogPost",
+      "description": "A blog post item",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Title of the post" },
+        "excerpt": { "type": "string", "description": "Short summary of the post" },
+        "content": { "type": "string", "description": "Full markdown content of the post" },
+        "imageUrl": { "type": "string", "description": "URL to the post image" },
+        "category": { "type": "string", "description": "Post category" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["title", "excerpt", "content", "imageUrl", "createdAt"]
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Global website settings",
+      "type": "object",
+      "properties": {
+        "siteTitle": { "type": "string", "description": "The title of the website" },
+        "logoUrl": { "type": "string", "description": "URL to the website logo" },
+        "contactEmail": { "type": "string", "description": "Contact email address" },
+        "footerText": { "type": "string", "description": "Text displayed in the footer" },
+        "heroTitle": { "type": "string", "description": "Main headline on the landing page" },
+        "heroSubtitle": { "type": "string", "description": "Sub-headline on the landing page" },
+        "profileName": { "type": "string", "description": "Name displayed in profile section" },
+        "profileImageUrl": { "type": "string", "description": "URL to the profile image" },
+        "facebookUrl": { "type": "string", "description": "Facebook profile URL" },
+        "instagramUrl": { "type": "string", "description": "Instagram profile URL" },
+        "tiktokUrl": { "type": "string", "description": "TikTok profile URL" }
+      }
+    },
+    "secrets": {
+      "title": "AdminSecrets",
+      "description": "Private API keys and admin PIN",
+      "type": "object",
+      "properties": {
+        "apiKey": { "type": "string", "description": "Sankavollerei API Key" },
+        "apiKey2": { "type": "string", "description": "Velixs API Key" },
+        "adminPin": { "type": "string", "description": "Admin login PIN" }
+      }
+    },
+    "playlist": {
+      "title": "Track",
+      "description": "A music track in the playlist",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Title of the track" },
+        "artist": { "type": "string", "description": "Artist of the track" },
+        "url": { "type": "string", "description": "Direct URL to the MP3 file" },
+        "cover": { "type": "string", "description": "URL to the cover image" },
+        "order": { "type": "number", "description": "Display order" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["title", "artist", "url", "cover", "order", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/posts/{postId}": {
+      "schema": "posts",
+      "description": "Collection of blog posts"
+    },
+    "/settings/global": {
+      "schema": "settings",
+      "description": "Global website configuration"
+    },
+    "/admin/secrets": {
+      "schema": "secrets",
+      "description": "Private administrative secrets"
+    },
+    "/playlist/{trackId}": {
+      "schema": "playlist",
+      "description": "Collection of music tracks"
+    }
+  }
+}

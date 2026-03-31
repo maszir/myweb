@@ -1,0 +1,114 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: posts
+    // Document ID: {postId}
+    // Fields:
+    //   - title: string (required)
+    //   - excerpt: string (required)
+    //   - content: string (required)
+    //   - imageUrl: string (required)
+    //   - category: string (optional)
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: settings
+    // Document ID: global
+    // Fields:
+    //   - siteTitle: string
+    //   - contactEmail: string
+    //   - footerText: string
+    //   - heroTitle: string
+    //   - heroSubtitle: string
+    //   - facebookUrl: string
+    //   - instagramUrl: string
+    //   - tiktokUrl: string
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        request.auth.token.email == "wazirusid@gmail.com" &&
+        request.auth.token.email_verified == true;
+    }
+
+    function isValidPost(data) {
+      return data.keys().hasAll(['title', 'excerpt', 'content', 'imageUrl', 'createdAt', 'status']) &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+             data.excerpt is string && data.excerpt.size() < 500 &&
+             data.content is string && data.content.size() < 10000 &&
+             data.imageUrl is string && data.imageUrl.size() < 500 &&
+             data.status in ['published', 'draft'] &&
+             data.createdAt is timestamp &&
+             (!('tags' in data) || data.tags is list);
+    }
+
+    function isValidSettings(data) {
+      return data.get('siteTitle', '') is string && data.siteTitle.size() < 100 &&
+             data.get('contactEmail', '') is string && data.contactEmail.size() < 100 &&
+             data.get('footerText', '') is string && data.footerText.size() < 200;
+    }
+
+    function isValidTrack(data) {
+      return data.keys().hasAll(['title', 'artist', 'url', 'cover', 'order', 'createdAt']) &&
+             data.title is string && data.title.size() > 0 &&
+             data.artist is string && data.artist.size() > 0 &&
+             data.url is string && data.url.size() > 0 &&
+             data.cover is string &&
+             data.order is number &&
+             data.createdAt is timestamp &&
+             (!('category' in data) || data.category is string) &&
+             (!('tags' in data) || data.tags is list) &&
+             (!('sourceType' in data) || data.sourceType in ['direct', 'youtube']);
+    }
+
+    // Blog Posts Rules
+    match /posts/{postId} {
+      allow read: if true; // Publicly readable
+      allow create, update: if isAdmin() && isValidPost(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    // Settings Rules
+    match /settings/global {
+      allow read: if true; // Publicly readable
+      allow create, update: if isAdmin() && isValidSettings(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    // Admin Secrets Rules
+    match /admin/secrets {
+      allow read, write: if isAdmin();
+    }
+
+    // Playlist Rules
+    match /playlist/{trackId} {
+      allow read: if true; // Publicly readable
+      allow create, update: if isAdmin() && isValidTrack(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    // Stats Rules
+    match /stats/visitors {
+      allow read: if true;
+      allow create: if true;
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['total', 'today', 'lastUpdated', 'online'])
+                    && request.resource.data.total is number
+                    && request.resource.data.today is number;
+    }
+
+    // Visitor Logs Rules
+    match /visitor_logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if true;
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "Portfolio Showcase & Admin",
+  "description": "A professional portfolio website with a project showcase and a secure admin dashboard for content management.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
