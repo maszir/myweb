@@ -33,6 +33,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const data = await res.json();
           setNeedsPin(data.needsPin);
           
+          if (!data.needsPin) {
+            setIsPinVerified(true);
+          }
+          
           // Check if already verified in this session
           const savedPin = localStorage.getItem('adminPin');
           if (savedPin && data.needsPin) {
@@ -49,9 +53,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 localStorage.removeItem('adminPin');
               }
             }
-          } else if (!data.needsPin) {
-            setIsPinVerified(true);
           }
+        } else {
+          console.error('API call failed:', await res.text());
+          // Fallback: assume no PIN needed if API fails, or handle as needed
+          setNeedsPin(false);
+          setIsPinVerified(true);
         }
       } catch (err) {
         console.error('Failed to check PIN requirement', err);
@@ -89,7 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const isAdmin = !!(user?.email === 'wazirusid@gmail.com' && user?.emailVerified && isPinVerified);
+  const isAdmin = !!(user?.email === 'wazirusid@gmail.com' && isPinVerified);
 
   return (
     <AuthContext.Provider value={{ user, loading, isAdmin, isPinVerified, needsPin, verifyPin }}>
